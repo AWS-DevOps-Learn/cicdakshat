@@ -1,0 +1,42 @@
+pipeline{
+    agent any
+    stages{
+        stage('CheckoutCode'){
+            steps{
+            git branch: 'master', url: 'https://github.com/AWS-DevOps-Learn/cicdakshat.git'
+            }
+        }
+        
+        stage('code compile'){
+            steps{
+               sh 'mvn compile'     
+            }
+        }
+        
+        stage('code test'){
+            steps{
+                sh 'mvn test'
+            }
+        }
+        
+        stage('code package'){
+            steps{
+                sh 'mvn package'
+            }
+        }
+        
+        stage('SonarQubeTest'){
+            steps{
+                sh 'mvn sonar:sonar'
+            }
+        }
+        
+        stage('DeploytoTOmcat'){
+            steps{
+                sshagent(['7e1b85c6-3572-4ab3-bbbc-a135b64c8bef']) {
+                sh "scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/declarative-pipeline-1/target/devops-integration.jar ubuntu@15.206.153.137:/opt/apache-tomcat-8.5.100/webapps/"
+                }
+            }
+        }
+    }
+}
